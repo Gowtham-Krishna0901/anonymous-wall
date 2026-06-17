@@ -613,6 +613,7 @@
 
     const { error } = await db.from('posts').insert([{
       text, mood,
+      author: isAdmin ? 'admin' : 'anonymous',
       reactions: { heart:0, cry:0, hug:0, wow:0, haha:0, strong:0 }
     }]);
     if (error) { showToast('❌ ' + error.message); alert('Post error: ' + error.message); btn.disabled=false; btn.textContent='Post anonymously'; return; }
