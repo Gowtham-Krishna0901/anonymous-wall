@@ -718,24 +718,31 @@
 
 
   // ── Admin ──
-  const ADMIN_PASS = 'uhgk0901';
+  const ADMIN_EMAIL = 'uhgk0901@gmail.com';
   let isAdmin = false;
 
-  function adminLogin() {
+  async function adminLogin() {
     if (isAdmin) return;
-    const pass = prompt('Enter admin password:');
-    if (pass === ADMIN_PASS) {
+    const password = prompt('Enter admin password:');
+    if (!password) return;
+    if (!CONFIGURED) { showToast('❌ Supabase not configured'); return; }
+    const { data, error } = await db.auth.signInWithPassword({
+      email: ADMIN_EMAIL,
+      password: password
+    });
+    if (error) {
+      showToast('❌ Wrong password');
+    } else {
       isAdmin = true;
       document.getElementById('adminBar').style.display = 'flex';
       document.getElementById('adminLoginBtn').style.display = 'none';
       showToast('✅ Admin mode on');
       renderPosts();
-    } else if (pass !== null) {
-      showToast('❌ Wrong password');
     }
   }
 
-  function adminLogout() {
+  async function adminLogout() {
+    await db.auth.signOut();
     isAdmin = false;
     document.getElementById('adminBar').style.display = 'none';
     document.getElementById('adminLoginBtn').style.display = 'flex';
