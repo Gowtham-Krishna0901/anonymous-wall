@@ -27,7 +27,7 @@
       --mood-thought:    #34D399;
       --mood-happy:      #FACC15;
       --mood-sad:        #60A5FA;
-      --mood-other:      #94A3B8;
+      --mood-random:      #94A3B8;
       --mood-suggestion:  #4ADE80;
 
       --radius:    14px;
@@ -320,7 +320,7 @@
     .mood-thought    { background: rgba(52,211,153,0.15);  color: var(--mood-thought); }
     .mood-happy      { background: rgba(250,204,21,0.15);  color: var(--mood-happy); }
     .mood-sad        { background: rgba(96,165,250,0.15);  color: var(--mood-sad); }
-    .mood-other      { background: rgba(148,163,184,0.15); color: var(--mood-other); }
+    .mood-random      { background: rgba(148,163,184,0.15); color: var(--mood-random); }
     .mood-suggestion  { background: rgba(74,222,128,0.15);  color: var(--mood-suggestion); }
 
     /* ── Loader / Empty / Error ── */
@@ -524,7 +524,7 @@
         <option value="secret">🤫 Secret</option>
         <option value="confession">🫣 Confession</option>
         <option value="suggestion">💡 Suggestion</option>
-        <option value="other">💬 Other</option>
+        <option value="random">💬 random</option>
       </select>
       <span class="char-count" id="charCount">0 / 500</span>
       <button class="post-btn" id="postBtn" >Post anonymously</button>
@@ -547,7 +547,7 @@
     <button class="filter-chip" data-mood="secret"     >🤫 Secret</button>
     <button class="filter-chip" data-mood="confession" >🫣 Confession</button>
     <button class="filter-chip" data-mood="suggestion"  >💡 Suggestion</button>
-    <button class="filter-chip" data-mood="other"      >💬 Other</button>
+    <button class="filter-chip" data-mood="random"      >💬 random</button>
   </div>
 
   <br/>
@@ -598,7 +598,7 @@
     { key:'strong', e:'💪' },
   ];
 
-  const MOOD_EMOJIS = { general:'🌐',thought:'💭',secret:'🤫', confession:'🫣', happy:'😄', sad:'😔', other:'💬', suggestion:'💡' };
+  const MOOD_EMOJIS = { general:'🌐',thought:'💭',secret:'🤫', confession:'🫣', happy:'😄', sad:'😔', random:'💬', suggestion:'💡' };
 
   // ── Char counter ──
   document.getElementById('msgInput').addEventListener('input', function() {
@@ -717,7 +717,7 @@
     }
 
     container.innerHTML = filtered.map((p, i) => {
-      const mood = p.mood || 'other';
+      const mood = p.mood || 'random';
       const emoji = MOOD_EMOJIS[mood] || '💬';
       return `
         <div class="post-card ${i === 0 && p._isNew ? 'new-post' : ''}">
