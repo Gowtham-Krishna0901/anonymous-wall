@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anonymous Wall</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0E0E11;
+      --surface:   #16161A;
+      --surface2:  #1F1F25;
+      --border:    rgba(255,255,255,0.08);
+      --border2:   rgba(255,255,255,0.14);
+      --text:      #E8E8F0;
+      --muted:     #7A7A8C;
+      --accent:    #C084FC;
+      --accent2:   #818CF8;
+      --danger:    #F87171;
+
+      --mood-rant:       #FF6B6B;
+      --mood-secret:     #C084FC;
+      --mood-confession: #FB923C;
+      --mood-thought:    #34D399;
+      --mood-happy:      #FACC15;
+      --mood-sad:        #60A5FA;
+      --mood-other:      #94A3B8;
+      --mood-suggestion:  #4ADE80;
+
+      --radius:    14px;
+      --radius-sm: 8px;
+      --font-display: 'Syne', sans-serif;
+      --font-body:    'Inter', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ── */
+    .app { max-width: 680px; margin: 0 auto; padding: 0 16px 80px; }
+
+    /* ── Header ── */
+    header {
+      padding: 40px 0 32px;
+      text-align: center;
+      position: relative;
+    }
+    header::after {
+      content: '';
+      display: block;
+      width: 64px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 99px;
+      margin: 20px auto 0;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 6vw, 42px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tagline {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Compose Card ── */
+    .compose {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+    .compose textarea {
+      width: 100%;
+      min-height: 88px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .compose textarea:focus { border-color: var(--accent); }
+    .compose textarea::placeholder { color: var(--muted); }
+    .compose-footer {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .mood-select {
+      flex: 1;
+      min-width: 140px;
+      height: 40px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0 12px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      cursor: pointer;
+      outline: none;
+    }
+    .mood-select:focus { border-color: var(--accent); }
+    .post-btn {
+      height: 40px;
+      padding: 0 22px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .post-btn:hover { opacity: 0.88; }
+    .post-btn:active { transform: scale(0.97); }
+    .post-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .char-count {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: auto;
+    }
+    .char-count.warn { color: var(--danger); }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 180px;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      height: 36px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0 12px 0 34px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--muted); }
+
+    .filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-chip {
+      height: 32px;
+      padding: 0 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .filter-chip:hover { border-color: var(--border2); color: var(--text); }
+    .filter-chip.active {
+      background: var(--surface2);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .post-count {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── Post Cards ── */
+    .posts { display: flex; flex-direction: column; gap: 14px; }
+
+    .post-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      transition: border-color 0.2s;
+      animation: fadeIn 0.3s ease;
+    }
+    .post-card:hover { border-color: var(--border2); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 12px;
+    }
+    .mood-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 24px;
+      padding: 0 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .anon-label {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .post-time {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    .post-text {
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.75;
+      word-break: break-word;
+    }
+
+    .reactions {
+      display: flex;
+      gap: 6px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .react-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 30px;
+      padding: 0 11px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .react-btn:hover { border-color: var(--border2); color: var(--text); }
+    .react-btn.active {
+      background: rgba(192, 132, 252, 0.12);
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .react-count { font-size: 12px; }
+
+    /* ── Mood colors ── */
+    .mood-rant       { background: rgba(255,107,107,0.15); color: var(--mood-rant); }
+    .mood-secret     { background: rgba(192,132,252,0.15); color: var(--mood-secret); }
+    .mood-confession { background: rgba(251,146,60,0.15);  color: var(--mood-confession); }
+    .mood-thought    { background: rgba(52,211,153,0.15);  color: var(--mood-thought); }
+    .mood-happy      { background: rgba(250,204,21,0.15);  color: var(--mood-happy); }
+    .mood-sad        { background: rgba(96,165,250,0.15);  color: var(--mood-sad); }
+    .mood-other      { background: rgba(148,163,184,0.15); color: var(--mood-other); }
+    .mood-suggestion  { background: rgba(74,222,128,0.15);  color: var(--mood-suggestion); }
+
+    /* ── Loader / Empty / Error ── */
+    .state-msg {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .state-msg .icon { font-size: 32px; display: block; margin-bottom: 10px; }
+
+    .spinner {
+      width: 28px; height: 28px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 48px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 10px 20px;
+      font-size: 14px;
+      color: var(--text);
+      transition: transform 0.3s ease;
+      z-index: 100;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Setup Banner ── */
+    .setup-banner {
+      background: linear-gradient(135deg, rgba(192,132,252,0.12), rgba(129,140,248,0.12));
+      border: 1px solid rgba(192,132,252,0.3);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .setup-banner strong { color: var(--accent); }
+    .setup-banner code {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 13px;
+      color: var(--accent2);
+    }
+
+    @media (max-width: 500px) {
+      .compose-footer { flex-direction: column; align-items: stretch; }
+      .post-btn { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo">Anonymous Wall</div>
+    <p class="tagline">Say what's on your mind — no names, no judgment, no trace.</p>
+  </header>
+
+  <!-- Setup Banner (shown until Supabase is configured) -->
+  <div class="setup-banner" id="setupBanner">
+    ⚙️ <strong>One-time setup needed:</strong> Open this file, find <code>SUPABASE_URL</code> and <code>SUPABASE_KEY</code> near the top of the script, and paste your Supabase project values. See the <strong>SETUP.md</strong> file for step-by-step instructions.
+  </div>
+
+  <!-- Compose -->
+  <div class="compose">
+    <textarea id="msgInput" maxlength="500" placeholder="What's on your mind? No one will know it's you…"></textarea>
+    <div class="compose-footer">
+      <select class="mood-select" id="moodSelect">
+        <option value="thought">💭 Thought</option>
+        <option value="rant">😤 Rant</option>
+        <option value="secret">🤫 Secret</option>
+        <option value="confession">🫣 Confession</option>
+        <option value="happy">😄 Happy</option>
+        <option value="sad">😔 Sad</option>
+        <option value="other">💬 Other</option>
+        <option value="suggestion">💡 Suggestion</option>
+      </select>
+      <span class="char-count" id="charCount">0 / 500</span>
+      <button class="post-btn" id="postBtn" >Post anonymously</button>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" id="searchInput" type="search" placeholder="Search posts…" />
+    </div>
+  </div>
+  <div class="filters" id="filters">
+    <button class="filter-chip active" data-mood="all" >All</button>
+    <button class="filter-chip" data-mood="thought"    >💭 Thought</button>
+    <button class="filter-chip" data-mood="rant"       >😤 Rant</button>
+    <button class="filter-chip" data-mood="secret"     >🤫 Secret</button>
+    <button class="filter-chip" data-mood="confession" >🫣 Confession</button>
+    <button class="filter-chip" data-mood="happy"      >😄 Happy</button>
+    <button class="filter-chip" data-mood="sad"        >😔 Sad</button>
+    <button class="filter-chip" data-mood="other"      >💬 Other</button>
+    <button class="filter-chip" data-mood="suggestion"  >💡 Suggestion</button>
+  </div>
+
+  <br/>
+  <div class="post-count" id="postCount"></div>
+  <div class="posts" id="postsContainer"><div class="spinner"></div></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  //  🔧 PASTE YOUR SUPABASE DETAILS HERE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const SUPABASE_URL = 'https://npnewdwovwrcldozuwus.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wbmV3ZHdvdndyY2xkb3p1d3VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NjEwMjksImV4cCI6MjA5NzIzNzAyOX0.kbjYwvmmr2fi55IfeLgoFt89e2sJOVRZTG5-e5ylgL4';
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  const CONFIGURED = SUPABASE_URL !== 'YOUR_SUPABASE_URL';
+  if (CONFIGURED) document.getElementById('setupBanner').style.display = 'none';
+
+  const db = CONFIGURED
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+    : null;
+
+  // ── Local demo data (used when Supabase not configured) ──
+  let demoPosts = [
+    { id:1, text:"Sometimes I pretend I'm fine but I haven't slept properly in weeks.", mood:'confession', created_at: new Date(Date.now()-120000).toISOString(), reactions:{heart:5,cry:2,hug:8,wow:1,haha:0,strong:3} },
+    { id:2, text:"I secretly want to quit my job and open a small bakery. Everyone would think I'm crazy.", mood:'secret', created_at: new Date(Date.now()-900000).toISOString(), reactions:{heart:12,cry:1,hug:6,wow:4,haha:2,strong:7} },
+    { id:3, text:"Nobody listens to me at home. Feels like I'm invisible.", mood:'rant', created_at: new Date(Date.now()-1800000).toISOString(), reactions:{heart:9,cry:15,hug:3,wow:0,haha:0,strong:4} },
+    { id:4, text:"I cried watching a dog video today and I have zero regrets.", mood:'happy', created_at: new Date(Date.now()-7200000).toISOString(), reactions:{heart:18,cry:0,hug:2,wow:1,haha:14,strong:0} },
+    { id:5, text:"Finished reading a book for the first time in 3 years. Felt like meeting an old friend.", mood:'thought', created_at: new Date(Date.now()-10800000).toISOString(), reactions:{heart:7,cry:0,hug:4,wow:2,haha:0,strong:5} },
+  ];
+  let demoNextId = 100;
+
+  // ── State ──
+  let allPosts   = [];
+  let activeFilter = 'all';
+  let userReacted  = {}; // { postId_emoji: true }
+
+  const EMOJIS = [
+    { key:'heart',  e:'❤️' },
+    { key:'cry',    e:'😢' },
+    { key:'hug',    e:'🤗' },
+    { key:'wow',    e:'😮' },
+    { key:'haha',   e:'😂' },
+    { key:'strong', e:'💪' },
+  ];
+
+  const MOOD_EMOJIS = { thought:'💭', rant:'😤', secret:'🤫', confession:'🫣', happy:'😄', sad:'😔', other:'💬', suggestion:'💡' };
+
+  // ── Char counter ──
+  document.getElementById('msgInput').addEventListener('input', function() {
+    const n = this.value.length;
+    const el = document.getElementById('charCount');
+    el.textContent = n + ' / 500';
+    el.classList.toggle('warn', n > 450);
+  });
+
+  // ── Time formatter ──
+  function timeAgo(iso) {
+    const diff = (Date.now() - new Date(iso)) / 1000;
+    if (diff < 60)   return 'just now';
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400)return Math.floor(diff/3600) + 'h ago';
+    return Math.floor(diff/86400) + 'd ago';
+  }
+
+  // ── Load posts ──
+  async function loadPosts() {
+    if (!CONFIGURED) {
+      allPosts = demoPosts.map(p => ({ ...p }));
+      renderPosts();
+      return;
+    }
+    const { data, error } = await db
+      .from('posts')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) { showError(); return; }
+    allPosts = data || [];
+    renderPosts();
+  }
+
+  // ── Submit post ──
+  async function submitPost() {
+    const text = document.getElementById('msgInput').value.trim();
+    const mood = document.getElementById('moodSelect').value;
+    if (!text) return;
+
+    const btn = document.getElementById('postBtn');
+    btn.disabled = true;
+    btn.textContent = 'Posting…';
+
+    if (!CONFIGURED) {
+      demoPosts.unshift({ id: demoNextId++, text, mood, created_at: new Date().toISOString(),
+        reactions:{heart:0,cry:0,hug:0,wow:0,haha:0,strong:0} });
+      allPosts = demoPosts.map(p => ({ ...p }));
+      document.getElementById('msgInput').value = '';
+      document.getElementById('charCount').textContent = '0 / 500';
+      renderPosts();
+      showToast('✅ Posted anonymously!');
+      btn.disabled = false;
+      btn.textContent = 'Post anonymously';
+      return;
+    }
+
+    const { error } = await db.from('posts').insert([{
+      text, mood,
+      reactions: { heart:0, cry:0, hug:0, wow:0, haha:0, strong:0 }
+    }]);
+    if (error) { showToast('❌ ' + error.message); alert('Post error: ' + error.message); btn.disabled=false; btn.textContent='Post anonymously'; return; }
+    else {
+      document.getElementById('msgInput').value = '';
+      document.getElementById('charCount').textContent = '0 / 500';
+      showToast('✅ Posted anonymously!');
+      await loadPosts();
+    }
+    btn.disabled = false;
+    btn.textContent = 'Post anonymously';
+  }
+
+  // ── React ──
+  async function react(postId, key) {
+    const rKey = postId + '_' + key;
+    const post  = allPosts.find(p => p.id === postId);
+    if (!post) return;
+
+    const reacted = userReacted[rKey];
+    const newVal  = Math.max(0, (post.reactions[key] || 0) + (reacted ? -1 : 1));
+    post.reactions = { ...post.reactions, [key]: newVal };
+    userReacted[rKey] = !reacted;
+
+    renderPosts();
+
+    if (!CONFIGURED) return;
+    await db.from('posts').update({ reactions: post.reactions }).eq('id', postId);
+  }
+
+  // ── Filter ──
+  function setFilter(btn) {
+    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.mood;
+    renderPosts();
+  }
+
+  // ── Render ──
+  function renderPosts() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allPosts.filter(p => {
+      const matchMood = activeFilter === 'all' || p.mood === activeFilter;
+      const matchQ    = !q || p.text.toLowerCase().includes(q) || p.mood.toLowerCase().includes(q);
+      return matchMood && matchQ;
+    });
+
+    document.getElementById('postCount').textContent =
+      filtered.length + ' post' + (filtered.length !== 1 ? 's' : '');
+
+    const container = document.getElementById('postsContainer');
+    if (!filtered.length) {
+      container.innerHTML = `<div class="state-msg"><span class="icon">🌑</span>No posts found. Be the first to share.</div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(p => {
+      const mood = p.mood || 'other';
+      const emoji = MOOD_EMOJIS[mood] || '💬';
+      return `
+        <div class="post-card">
+          <div class="post-header">
+            <span class="mood-badge mood-${mood}">${emoji} ${mood}</span>
+            <span class="anon-label">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="21" x2="23" y2="19"/><line x1="19" y1="21" x2="19" y2="19"/><line x1="21" y1="19" x2="21" y2="17"/></svg>
+              anonymous
+            </span>
+            <span class="post-time">${timeAgo(p.created_at)}</span>
+          </div>
+          <p class="post-text">${escHtml(p.text)}</p>
+          <div class="reactions">
+            ${EMOJIS.map(em => {
+              const count   = (p.reactions && p.reactions[em.key]) || 0;
+              const reacted = userReacted[p.id + '_' + em.key] ? 'active' : '';
+              return `<button class="react-btn ${reacted}" onclick="react(${JSON.stringify(p.id)}, '${em.key}')">
+                ${em.e} <span class="react-count">${count}</span>
+              </button>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function showError() {
+    document.getElementById('postsContainer').innerHTML =
+      `<div class="state-msg"><span class="icon">⚠️</span>Could not load posts. Check your Supabase config.</div>`;
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Toast ──
+  let toastTimer;
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  // ── Init ──
+  document.getElementById('postBtn').addEventListener('click', submitPost);
+  document.getElementById('searchInput').addEventListener('input', renderPosts);
+  document.querySelectorAll('.filter-chip').forEach(btn => {
+    btn.addEventListener('click', () => setFilter(btn));
+  });
+
+  loadPosts();
+
+  // Auto-refresh every 30s when Supabase is connected
+  if (CONFIGURED) setInterval(loadPosts, 30000);
+</script>
+</body>
+</html>
