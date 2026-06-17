@@ -676,9 +676,8 @@
         <div class="post-card ${i === 0 && p._isNew ? 'new-post' : ''}">
           <div class="post-header">
             <span class="mood-badge mood-${mood}">${emoji} ${mood}</span>
-            <span class="anon-label">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="21" x2="23" y2="19"/><line x1="19" y1="21" x2="19" y2="19"/><line x1="21" y1="19" x2="21" y2="17"/></svg>
-              anonymous
+            <span class="anon-label" style="${p.author === 'admin' ? 'color:var(--accent);font-weight:600;' : ''}">
+              ${p.author === 'admin' ? '🛡️ Admin' : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="21" x2="23" y2="19"/><line x1="19" y1="21" x2="19" y2="19"/><line x1="21" y1="19" x2="21" y2="17"/></svg> anonymous'}
             </span>
             <span class="post-time">${timeAgo(p.created_at)}</span>
             ${isAdmin ? `<button class="delete-btn" onclick="deletePost(${JSON.stringify(p.id)})">🗑️ Delete</button>` : ''}
