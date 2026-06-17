@@ -524,7 +524,7 @@
         <option value="secret">🤫 Secret</option>
         <option value="confession">🫣 Confession</option>
         <option value="suggestion">💡 Suggestion</option>
-        <option value="random">💬 random</option>
+        <option value="random">🎲 Random</option>
       </select>
       <span class="char-count" id="charCount">0 / 500</span>
       <button class="post-btn" id="postBtn" >Post anonymously</button>
@@ -547,7 +547,7 @@
     <button class="filter-chip" data-mood="secret"     >🤫 Secret</button>
     <button class="filter-chip" data-mood="confession" >🫣 Confession</button>
     <button class="filter-chip" data-mood="suggestion"  >💡 Suggestion</button>
-    <button class="filter-chip" data-mood="random"      >💬 random</button>
+    <button class="filter-chip" data-mood="random"      >🎲 Random</button>
   </div>
 
   <br/>
@@ -598,7 +598,7 @@
     { key:'strong', e:'💪' },
   ];
 
-  const MOOD_EMOJIS = { general:'🌐',thought:'💭',secret:'🤫', confession:'🫣', happy:'😄', sad:'😔', random:'💬', suggestion:'💡' };
+  const MOOD_EMOJIS = { general:'🌐',thought:'💭',secret:'🤫', confession:'🫣', happy:'😄', sad:'😔', random:'🎲', suggestion:'💡' };
 
   // ── Char counter ──
   document.getElementById('msgInput').addEventListener('input', function() {
@@ -718,7 +718,7 @@
 
     container.innerHTML = filtered.map((p, i) => {
       const mood = p.mood || 'random';
-      const emoji = MOOD_EMOJIS[mood] || '💬';
+      const emoji = MOOD_EMOJIS[mood] || '🎲';
       return `
         <div class="post-card ${i === 0 && p._isNew ? 'new-post' : ''}">
           <div class="post-header">
