@@ -21,7 +21,7 @@
       --accent2:   #818CF8;
       --danger:    #F87171;
 
-      --mood-rant:       #FF6B6B;
+      --mood-general:       #FF6B6B;
       --mood-secret:     #C084FC;
       --mood-confession: #FB923C;
       --mood-thought:    #34D399;
@@ -288,6 +288,7 @@
       gap: 6px;
       margin-top: 14px;
       flex-wrap: wrap;
+      overflow-x: auto;
     }
     .react-btn {
       display: inline-flex;
@@ -302,6 +303,7 @@
       font-size: 13px;
       cursor: pointer;
       transition: all 0.15s;
+      flex: 1 1 auto;
     }
     .react-btn:hover { border-color: var(--border2); color: var(--text); }
     .react-btn.active {
@@ -312,7 +314,7 @@
     .react-count { font-size: 12px; }
 
     /* ── Mood colors ── */
-    .mood-rant       { background: rgba(255,107,107,0.15); color: var(--mood-rant); }
+    .mood-general       { background: rgba(255,107,107,0.15); color: var(--mood-general); }
     .mood-secret     { background: rgba(192,132,252,0.15); color: var(--mood-secret); }
     .mood-confession { background: rgba(251,146,60,0.15);  color: var(--mood-confession); }
     .mood-thought    { background: rgba(52,211,153,0.15);  color: var(--mood-thought); }
@@ -441,6 +443,115 @@
       .compose-footer { flex-direction: column; align-items: stretch; }
       .post-btn { text-align: center; }
     }
+    /* ===== MOBILE OPTIMIZATION ===== */
+@media (max-width: 768px) {
+
+  .app {
+    padding: 0 12px 90px;
+  }
+
+  /* Smaller header */
+  header {
+    padding: 28px 0 20px;
+  }
+
+  .logo {
+    font-size: 2.4rem;
+    line-height: 1.1;
+  }
+
+  .tagline {
+    font-size: 13px;
+    padding: 0 12px;
+  }
+
+  /* Smaller cards */
+  .compose,
+  .post-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  /* Better textarea size */
+  .compose textarea {
+    min-height: 90px;
+    font-size: 14px;
+  }
+
+  /* Footer layout */
+  .compose-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mood-select,
+  .post-btn {
+    width: 100%;
+  }
+
+  .char-count {
+    margin-left: 0;
+    text-align: right;
+  }
+
+  /* Search bar */
+  .search-wrap {
+    min-width: 100%;
+  }
+
+  /* Horizontal scrolling filters */
+  .filters {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 5px;
+  }
+
+  .filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-chip {
+    flex-shrink: 0;
+  }
+
+  /* Post header wrapping */
+  .post-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .post-time {
+    margin-left: auto;
+    font-size: 11px;
+  }
+
+  /* Reaction buttons */
+  .reactions {
+    gap: 8px;
+  }
+
+  .react-btn {
+    min-width: 58px;
+    justify-content: center;
+  }
+
+  /* Floating admin button */
+  .admin-login-btn {
+    width: 48px;
+    height: 48px;
+    right: 16px;
+    bottom: 16px;
+  }
+
+  /* Toast */
+  .toast {
+    max-width: 90%;
+    white-space: normal;
+    text-align: center;
+  }
+}
   </style>
 </head>
 <body>
@@ -471,7 +582,7 @@
     <textarea id="msgInput" maxlength="500" placeholder="What's on your mind? No one will know it's you…"></textarea>
     <div class="compose-footer">
       <select class="mood-select" id="moodSelect">
-        <option value="thought">General</option>
+        <option value="general" selected>🌐General</option>
         <option value="thought">💭 Thought</option>
         <option value="happy">😄 Happy</option>
         <option value="sad">😔 Sad</option>
@@ -494,7 +605,7 @@
   </div>
   <div class="filters" id="filters">
     <button class="filter-chip active" data-mood="all" >All</button>
-    <button class="filter-chip" data-mood="rant"       >General</button>
+    <button class="filter-chip" data-mood="general"       >🌐General</button>
     <button class="filter-chip" data-mood="thought"    >💭 Thought</button>
     <button class="filter-chip" data-mood="happy"      >😄 Happy</button>
     <button class="filter-chip" data-mood="sad"        >😔 Sad</button>
@@ -532,7 +643,7 @@
   let demoPosts = [
     { id:1, text:"Sometimes I pretend I'm fine but I haven't slept properly in weeks.", mood:'confession', created_at: new Date(Date.now()-120000).toISOString(), reactions:{heart:5,cry:2,hug:8,wow:1,haha:0,strong:3} },
     { id:2, text:"I secretly want to quit my job and open a small bakery. Everyone would think I'm crazy.", mood:'secret', created_at: new Date(Date.now()-900000).toISOString(), reactions:{heart:12,cry:1,hug:6,wow:4,haha:2,strong:7} },
-    { id:3, text:"Nobody listens to me at home. Feels like I'm invisible.", mood:'rant', created_at: new Date(Date.now()-1800000).toISOString(), reactions:{heart:9,cry:15,hug:3,wow:0,haha:0,strong:4} },
+    { id:3, text:"Nobody listens to me at home. Feels like I'm invisible.", mood:'general', created_at: new Date(Date.now()-1800000).toISOString(), reactions:{heart:9,cry:15,hug:3,wow:0,haha:0,strong:4} },
     { id:4, text:"I cried watching a dog video today and I have zero regrets.", mood:'happy', created_at: new Date(Date.now()-7200000).toISOString(), reactions:{heart:18,cry:0,hug:2,wow:1,haha:14,strong:0} },
     { id:5, text:"Finished reading a book for the first time in 3 years. Felt like meeting an old friend.", mood:'thought', created_at: new Date(Date.now()-10800000).toISOString(), reactions:{heart:7,cry:0,hug:4,wow:2,haha:0,strong:5} },
   ];
@@ -552,7 +663,7 @@
     { key:'strong', e:'💪' },
   ];
 
-  const MOOD_EMOJIS = { thought:'💭', rant:'😤', secret:'🤫', confession:'🫣', happy:'😄', sad:'😔', other:'💬', suggestion:'💡' };
+  const MOOD_EMOJIS = { general:'🌐',thought:'💭',secret:'🤫', confession:'🫣', happy:'😄', sad:'😔', other:'💬', suggestion:'💡' };
 
   // ── Char counter ──
   document.getElementById('msgInput').addEventListener('input', function() {
