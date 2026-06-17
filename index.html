@@ -235,6 +235,15 @@
       from { opacity: 0; transform: translateY(6px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+    @keyframes glowFlash {
+      0%   { box-shadow: 0 0 0px rgba(192,132,252,0); border-color: var(--border); }
+      30%  { box-shadow: 0 0 24px rgba(192,132,252,0.7), 0 0 48px rgba(129,140,248,0.4); border-color: var(--accent); }
+      70%  { box-shadow: 0 0 12px rgba(192,132,252,0.3); border-color: var(--accent); }
+      100% { box-shadow: 0 0 0px rgba(192,132,252,0); border-color: var(--border); }
+    }
+    .post-card.new-post {
+      animation: fadeIn 0.3s ease, glowFlash 1.4s ease forwards;
+    }
 
     .post-header {
       display: flex;
@@ -369,6 +378,65 @@
       color: var(--accent2);
     }
 
+
+    /* ── Admin ── */
+    .admin-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(192,132,252,0.08);
+      border: 1px solid rgba(192,132,252,0.25);
+      border-radius: var(--radius-sm);
+      padding: 8px 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--accent);
+    }
+    .admin-bar button {
+      background: none;
+      border: 1px solid rgba(192,132,252,0.3);
+      border-radius: var(--radius-sm);
+      color: var(--accent);
+      font-size: 12px;
+      padding: 4px 12px;
+      cursor: pointer;
+    }
+    .admin-bar button:hover { background: rgba(192,132,252,0.1); }
+
+    .admin-login-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99;
+      transition: all 0.2s;
+    }
+    .admin-login-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .delete-btn {
+      margin-left: auto;
+      background: none;
+      border: 1px solid rgba(248,113,113,0.3);
+      border-radius: var(--radius-sm);
+      color: var(--danger);
+      font-size: 12px;
+      padding: 3px 10px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+    .delete-btn:hover { opacity: 1; background: rgba(248,113,113,0.08); }
+
     @media (max-width: 500px) {
       .compose-footer { flex-direction: column; align-items: stretch; }
       .post-btn { text-align: center; }
@@ -387,6 +455,16 @@
   <div class="setup-banner" id="setupBanner">
     ⚙️ <strong>One-time setup needed:</strong> Open this file, find <code>SUPABASE_URL</code> and <code>SUPABASE_KEY</code> near the top of the script, and paste your Supabase project values. See the <strong>SETUP.md</strong> file for step-by-step instructions.
   </div>
+
+
+  <!-- Admin bar (shown when logged in) -->
+  <div class="admin-bar" id="adminBar" style="display:none">
+    🛡️ Admin mode active
+    <button onclick="adminLogout()">Logout</button>
+  </div>
+
+  <!-- Hidden admin login button (bottom right) -->
+  <button class="admin-login-btn" id="adminLoginBtn" title="Admin login" onclick="adminLogin()">🔒</button>
 
   <!-- Compose -->
   <div class="compose">
@@ -494,7 +572,7 @@
   }
 
   // ── Load posts ──
-  async function loadPosts() {
+  async function loadPosts(markNew = false) {
     if (!CONFIGURED) {
       allPosts = demoPosts.map(p => ({ ...p }));
       renderPosts();
@@ -506,6 +584,7 @@
       .order('created_at', { ascending: false });
     if (error) { showError(); return; }
     allPosts = data || [];
+    if (markNew && allPosts.length) allPosts[0]._isNew = true;
     renderPosts();
   }
 
@@ -541,7 +620,7 @@
       document.getElementById('msgInput').value = '';
       document.getElementById('charCount').textContent = '0 / 500';
       showToast('✅ Posted anonymously!');
-      await loadPosts();
+      await loadPosts(true);
     }
     btn.disabled = false;
     btn.textContent = 'Post anonymously';
@@ -590,11 +669,11 @@
       return;
     }
 
-    container.innerHTML = filtered.map(p => {
+    container.innerHTML = filtered.map((p, i) => {
       const mood = p.mood || 'other';
       const emoji = MOOD_EMOJIS[mood] || '💬';
       return `
-        <div class="post-card">
+        <div class="post-card ${i === 0 && p._isNew ? 'new-post' : ''}">
           <div class="post-header">
             <span class="mood-badge mood-${mood}">${emoji} ${mood}</span>
             <span class="anon-label">
@@ -602,6 +681,7 @@
               anonymous
             </span>
             <span class="post-time">${timeAgo(p.created_at)}</span>
+            ${isAdmin ? `<button class="delete-btn" onclick="deletePost(${JSON.stringify(p.id)})">🗑️ Delete</button>` : ''}
           </div>
           <p class="post-text">${escHtml(p.text)}</p>
           <div class="reactions">
@@ -634,6 +714,45 @@
     el.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+
+  // ── Admin ──
+  const ADMIN_PASS = 'uhgk0901';
+  let isAdmin = false;
+
+  function adminLogin() {
+    if (isAdmin) return;
+    const pass = prompt('Enter admin password:');
+    if (pass === ADMIN_PASS) {
+      isAdmin = true;
+      document.getElementById('adminBar').style.display = 'flex';
+      document.getElementById('adminLoginBtn').style.display = 'none';
+      showToast('✅ Admin mode on');
+      renderPosts();
+    } else if (pass !== null) {
+      showToast('❌ Wrong password');
+    }
+  }
+
+  function adminLogout() {
+    isAdmin = false;
+    document.getElementById('adminBar').style.display = 'none';
+    document.getElementById('adminLoginBtn').style.display = 'flex';
+    showToast('Logged out');
+    renderPosts();
+  }
+
+  async function deletePost(postId) {
+    if (!confirm('Delete this post?')) return;
+    if (CONFIGURED) {
+      const { error } = await db.from('posts').delete().eq('id', postId);
+      if (error) { showToast('❌ Could not delete'); return; }
+    }
+    allPosts = allPosts.filter(p => p.id !== postId);
+    demoPosts = demoPosts.filter(p => p.id !== postId);
+    showToast('🗑️ Post deleted');
+    renderPosts();
   }
 
   // ── Init ──
