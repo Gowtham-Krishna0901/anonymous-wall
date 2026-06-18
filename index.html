@@ -107,34 +107,32 @@
     .compose-footer {
       display: flex;
       gap: 10px;
-      align-items: center;
+      align-items: stretch;
       margin-top: 12px;
-      flex-wrap: wrap;
     }
     .mood-select {
       flex: 1;
-      min-width: 140px;
-      height: 60px;
+      height: 48px;
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 0 12px;
       color: var(--text);
       font-family: var(--font-body);
-      font-size: 14px;
+      font-size: 15px;
       cursor: pointer;
       outline: none;
     }
     .mood-select:focus { border-color: var(--accent); }
     .post-btn {
-      height: 40px;
+      height: 48px;
       padding: 0 22px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       border: none;
       border-radius: var(--radius-sm);
       color: #fff;
       font-family: var(--font-body);
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
@@ -339,6 +337,8 @@
       padding: 48px 16px;
       color: var(--muted);
       font-size: 15px;
+      grid-column: 1 / -1;
+      width: 100%;
     }
     .state-msg .icon { font-size: 32px; display: block; margin-bottom: 10px; }
 
@@ -450,8 +450,9 @@
     .delete-btn:hover { opacity: 1; background: rgba(248,113,113,0.08); }
 
     @media (max-width: 500px) {
-      .compose-footer { flex-direction: column; align-items: stretch; }
-      .post-btn { text-align: center; }
+      .compose-footer { flex-direction: column; }
+      .mood-select { width: 100%; height: 64px; font-size: 16px; padding: 0 16px; }
+      .post-btn { width: 100%; height: 64px; font-size: 16px; text-align: center; }
     }
     @media (max-width: 768px) {
 
@@ -598,6 +599,9 @@
   <!-- Compose -->
   <div class="compose">
     <textarea id="msgInput" maxlength="500" placeholder="What's on your mind? No one will know it's you…"></textarea>
+    <div style="text-align:right; margin-top:6px;">
+      <span class="char-count" id="charCount">0 / 500</span>
+    </div>
     <div class="compose-footer">
       <select class="mood-select" id="moodSelect">
         <option value="general" selected>🌐 General</option>
@@ -609,8 +613,7 @@
         <option value="suggestion">💡 Suggestion</option>
         <option value="random">🎲 Random</option>
       </select>
-      <span class="char-count" id="charCount">0 / 500</span>
-      <button class="post-btn" id="postBtn" >Post anonymously</button>
+      <button class="post-btn" id="postBtn">Post anonymously</button>
     </div>
   </div>
 
