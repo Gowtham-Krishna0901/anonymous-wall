@@ -118,24 +118,13 @@
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 0 14px;
+      padding: 0 12px;
       color: var(--text);
       font-family: var(--font-body);
-      font-size: 16px;
-      line-height:1;
+      font-size: 14px;
       cursor: pointer;
       outline: none;
-      appearance:none;
-      -webkit-appearance:none;
-      -moz-appearance:none;
     }
-    @media (max-width: 768px) {
-  .mood-select {
-    height: 42px;
-    font-size: 15px;
-    padding: 0 12px;
-  }
-}
     .mood-select:focus { border-color: var(--accent); }
     .post-btn {
       height: 40px;
@@ -462,8 +451,7 @@
 
     @media (max-width: 500px) {
       .compose-footer { flex-direction: column; align-items: stretch; }
-      .mood-select {width:100%;}
-      .post-btn { text-align: center; width:100%; }
+      .post-btn { text-align: center; }
     }
     @media (max-width: 768px) {
 
@@ -612,7 +600,7 @@
     <textarea id="msgInput" maxlength="500" placeholder="What's on your mind? No one will know it's you…"></textarea>
     <div class="compose-footer">
       <select class="mood-select" id="moodSelect">
-        <option value="general" selected>🌐 General</option>
+        <option value="general" selected>🌐General</option>
         <option value="thought">💭 Thought</option>
         <option value="happy">😄 Happy</option>
         <option value="sad">😔 Sad</option>
@@ -635,7 +623,7 @@
   </div>
   <div class="filters" id="filters">
     <button class="filter-chip active" data-mood="all" >All</button>
-    <button class="filter-chip" data-mood="general"       >🌐 General</button>
+    <button class="filter-chip" data-mood="general"       >🌐General</button>
     <button class="filter-chip" data-mood="thought"    >💭 Thought</button>
     <button class="filter-chip" data-mood="happy"      >😄 Happy</button>
     <button class="filter-chip" data-mood="sad"        >😔 Sad</button>
