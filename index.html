@@ -565,6 +565,86 @@
       transition: opacity 0.8s ease 0.1s;
     }
     #mainApp.visible { opacity: 1; }
+
+    /* ── Reply System ── */
+    .reply-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-body);
+      padding: 0;
+      transition: color 0.15s;
+    }
+    .reply-toggle:hover { color: var(--accent); }
+
+    .reply-section {
+      display: none;
+      margin-top: 10px;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+    .reply-section.open { display: block; }
+
+    .reply-bubble {
+      background: rgba(192,132,252,0.08);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .reply-bubble-author {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .admin-reply-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      align-items: flex-end;
+    }
+    .admin-reply-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      resize: none;
+      min-height: 38px;
+      max-height: 100px;
+      transition: border-color 0.2s;
+    }
+    .admin-reply-input:focus { border-color: var(--accent); }
+    .admin-reply-btn {
+      height: 38px;
+      padding: 0 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .admin-reply-btn:hover { opacity: 0.85; }
   </style>
 </head>
 <body>
@@ -825,6 +905,22 @@
               </button>`;
             }).join('')}
           </div>
+          ${p.admin_reply || isAdmin ? `
+          <button class="reply-toggle" onclick="toggleReply('reply-${p.id}')">
+            💬 ${p.admin_reply ? '1 reply' : 'Add reply'}
+          </button>
+          <div class="reply-section" id="reply-${p.id}">
+            ${p.admin_reply ? `
+            <div class="reply-bubble">
+              <span class="reply-bubble-author">🛡️ Admin</span>
+              ${escHtml(p.admin_reply)}
+            </div>` : ''}
+            ${isAdmin ? `
+            <div class="admin-reply-form">
+              <textarea class="admin-reply-input" id="replyInput-${p.id}" placeholder="Write a reply as Admin..." rows="1"></textarea>
+              <button class="admin-reply-btn" onclick="submitReply(${JSON.stringify(p.id)})">Reply</button>
+            </div>` : ''}
+          </div>` : ''}
         </div>`;
     }).join('');
   }
@@ -892,6 +988,38 @@
     demoPosts = demoPosts.filter(p => p.id !== postId);
     showToast('🗑️ Post deleted');
     renderPosts();
+  }
+
+  // ── Reply System ──
+  function toggleReply(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('open');
+  }
+
+  async function submitReply(postId) {
+    const input = document.getElementById('replyInput-' + postId);
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+
+    const post = allPosts.find(p => p.id === postId);
+    if (!post) return;
+
+    if (CONFIGURED) {
+      const { error } = await db.from('posts').update({ admin_reply: text }).eq('id', postId);
+      if (error) { showToast('❌ Could not save reply'); return; }
+    }
+
+    post.admin_reply = text;
+    showToast('✅ Reply posted!');
+    renderPosts();
+
+    // Reopen the reply section after re-render
+    setTimeout(() => {
+      const el = document.getElementById('reply-' + postId);
+      if (el) el.classList.add('open');
+    }, 50);
   }
 
   // ── Init ──
