@@ -23,7 +23,6 @@
 
       --mood-general:       #FF6B6B;
       --mood-secret:     #C084FC;
-      --mood-confession: #FB923C;
       --mood-thought:    #34D399;
       --mood-happy:      #FACC15;
       --mood-sad:        #60A5FA;
@@ -324,7 +323,6 @@
     /* ── Mood colors ── */
     .mood-general       { background: rgba(255,107,107,0.15); color: var(--mood-general); }
     .mood-secret     { background: rgba(192,132,252,0.15); color: var(--mood-secret); }
-    .mood-confession { background: rgba(251,146,60,0.15);  color: var(--mood-confession); }
     .mood-thought    { background: rgba(52,211,153,0.15);  color: var(--mood-thought); }
     .mood-happy      { background: rgba(250,204,21,0.15);  color: var(--mood-happy); }
     .mood-sad        { background: rgba(96,165,250,0.15);  color: var(--mood-sad); }
@@ -689,7 +687,6 @@
         <option value="happy">😄 Happy</option>
         <option value="sad">😔 Sad</option>
         <option value="secret">🤫 Secret</option>
-        <option value="confession">🫣 Confession</option>
         <option value="suggestion">💡 Suggestion</option>
         <option value="random">🎲 Random</option>
       </select>
@@ -711,7 +708,6 @@
     <button class="filter-chip" data-mood="happy"      >😄 Happy</button>
     <button class="filter-chip" data-mood="sad"        >😔 Sad</button>
     <button class="filter-chip" data-mood="secret"     >🤫 Secret</button>
-    <button class="filter-chip" data-mood="confession" >🫣 Confession</button>
     <button class="filter-chip" data-mood="suggestion"  >💡 Suggestion</button>
     <button class="filter-chip" data-mood="random"      >🎲 Random</button>
   </div>
@@ -761,7 +757,7 @@
     { key:'hug',    e:'🤗' },
     { key:'wow',    e:'😮' },
     { key:'haha',   e:'😂' },
-    { key:'strong', e:'👍' },
+    { key:'strong', e:'💪' },
   ];
 
   const MOOD_EMOJIS = { general:'🌐',thought:'💭',secret:'🤫', confession:'🫣', happy:'😄', sad:'😔', random:'🎲', suggestion:'💡' };
